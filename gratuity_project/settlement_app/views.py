@@ -51,7 +51,15 @@ def output_page(request):
             gratuity_after_5_years = (basic_salary / 30) * 30 * (years - 5)
             gratuity = gratuity_first_5_years + gratuity_after_5_years
 
-    total_payable = gratuity + pending_al_salary - deductions
+    final_payable = gratuity + pending_al_salary - deductions
+    total_payable = max(final_payable, 0)
+
+    note = ""
+    if final_payable < 0:
+        note += f"Amount recoverable from employee: {abs(final_payable):.2f} AED<br>"
+    if employment_days < 365:
+        note += "Below 1 year — no gratuity is payable.<br>"
+
 
     context = {
         'emp_name': emp_name,
@@ -64,6 +72,8 @@ def output_page(request):
         'pending_al_salary': round(pending_al_salary, 2),
         'gratuity': round(gratuity, 2),
         'total_payable': round(total_payable, 2),
+        'note': note,
+
     }
 
     return render(request, 'output_page.html', context)
