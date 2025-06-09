@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gratuity & AL Calculator</title>
+    {% load static %}
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="relative bg-cover bg-center bg-fixed" style="background-image: url('{% static 'images/background.jpg' %}')">
+
+{% load widget_tweaks %}
+
+<header class="text-center py-3 text-white/80 bg-black/50">
+    <h6 class="text-xl font-medium uppercase">Gratuity & Annual Leave Calculator</h6>
+</header>
+
+<div class="bg-white/90 p-8 rounded-md shadow-md max-w-5xl mx-auto mt-8">
+    <h5 class="text-center text-md text-gray-800 font-semibold mb-4 uppercase">Employee Settlement Form</h5>
+    <form method="post" id="settlementForm" class="space-y-6">
+        {% csrf_token %}
+
+        <div>
+            <label class="block text-gray-800 font-medium mb-1">Employee Name</label>
+            {{ form.employee_name|add_class:"w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-gray-800 font-medium mb-1">Joining Date</label>
+                {{ form.joining_date|add_class:"w-full border text-gray-500 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"|attr:"placeholder:dd-mm-yyyy" }}
+            </div>
+            <div>
+                <label class="block text-gray-800 font-medium mb-1">Ending Date</label>
+                {{ form.ending_date|add_class:"w-full border text-gray-500 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"|attr:"placeholder:dd-mm-yyyy" }}
+                <div id="date-error" class="text-red-600 text-sm mt-1"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-gray-800 font-medium mb-1">Basic Salary</label>
+                {{ form.basic_salary|add_class:"number-input w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+            </div>
+            <div>
+                <label class="block text-gray-800 font-medium mb-1">Allowances</label>
+                {{ form.allowances|add_class:"number-input w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+            </div>
+            <div>
+                <label class="block text-gray-800 font-medium mb-1">Deductions</label>
+                {{ form.deductions|add_class:"number-input w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-gray-800 font-medium mb-1">Annual Leave Used (Days)</label>
+                {{ form.al_used|add_class:"number-input w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+            </div>
+            <div>
+                <label class="block text-gray-800 font-medium mb-1">Absence Days</label>
+                {{ form.absence_days|add_class:"number-input w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+            </div>
+        </div>
+
+        <div class="text-right pt-4">
+            <button type="submit" id="submitBtn" class="bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-blue-700 transition duration-300">Apply</button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    const numberInputs = document.querySelectorAll('.number-input');
+    numberInputs.forEach(input => {
+        input.addEventListener('input', () => {
+            if (parseFloat(input.value) < 0) {
+                input.value = '';
+            }
+        });
+    });
+
+    const joiningDate = document.getElementById("id_joining_date");
+    const endingDate = document.getElementById("id_ending_date");
+    const dateError = document.getElementById("date-error");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function validateDates() {
+        const start = new Date(joiningDate.value);
+        const end = new Date(endingDate.value);
+
+        if (joiningDate.value && endingDate.value) {
+            if (end <= start) {
+                dateError.textContent = "Ending Date must be after Joining Date.";
+                submitBtn.disabled = true;
+            } else {
+                dateError.textContent = "";
+                submitBtn.disabled = false;
+            }
+        } else {
+            dateError.textContent = "";
+            submitBtn.disabled = false;
+        }
+    }
+
+    joiningDate.addEventListener('change', validateDates);
+    endingDate.addEventListener('change', validateDates);
+</script>
+
+</body>
+</html>
